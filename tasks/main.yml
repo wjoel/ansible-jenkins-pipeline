@@ -1,0 +1,122 @@
+---
+- name: Install ca-certificates
+  apt: name=ca-certificates state=present
+
+- name: Add Jenkins repository key
+  apt_key: id=D50582E6 url=https://pkg.jenkins.io/debian/jenkins.io.key
+
+- name: Add Jenkins repository
+  apt_repository: repo='deb http://pkg.jenkins.io/debian binary/' state=present update_cache=yes
+
+- name: Install Jenkins
+  apt: name=jenkins state=present
+
+- name: Set Jenkins JAVA_ARGS
+  lineinfile:
+    dest: "{{ jenkins_defaults_file }}"
+    insertbefore: "^JENKINS_ARGS.*"
+    line: "JAVA_ARGS=\"{{ jenkins_java_args }}\""
+  register: jenkins_defaults
+
+- name: Allow logins with Jenkins SSH key
+  authorized_key: user=jenkins key="{{ lookup('file', jenkins_ssh_public_key) }}"
+
+- name: Ensure Jenkins SSH directory exists
+  file: path="~jenkins/.ssh" owner=jenkins group=jenkins mode=0755 state=directory
+
+- name: Install Jenkins SSH key
+  copy: src="{{ jenkins_ssh_private_key }}" dest="~jenkins/.ssh/id_rsa" owner=jenkins group=jenkins mode=0600
+
+- name: Remove initial Jenkins password
+  file: name=/var/lib/jenkins/secrets/initialAdminPassword state=absent
+
+- name: Create Jenkins admin password hash
+  shell: echo -n "{{ jenkins_admin_password }}{ansible_jenkins}" | sha256sum - | awk '{ print $1; }'
+  register: jenkins_password_hash
+
+- name: Create admin user directory
+  file: path="~jenkins/users/admin" owner=jenkins group=jenkins mode=0755 state=directory recurse=yes
+
+- name: Create admin
+  template: src=admin-config.xml.j2 dest="~jenkins/users/admin/config.xml" force=no
+  register: jenkins_admin_config
+
+- name: Create config
+  copy: src=config.xml dest="~jenkins/config.xml"
+  register: jenkins_config
+
+# Restart with a task instead of a handler, since we need those changes to
+# be applied right away so that we can use the admin password in API calls.
+- name: Restart Jenkins if necessary
+  service: name=jenkins state=restarted
+  when: jenkins_defaults|changed or jenkins_admin_config|changed or jenkins_config|changed
+
+- name: Wait for Jenkins to become available
+  wait_for: port=8080
+
+- name: Get Jenkins crumb
+  uri:
+    user: admin
+    password: "{{ jenkins_admin_password }}"
+    force_basic_auth: yes
+    url: "http://127.0.0.1:8080/crumbIssuer/api/json"
+    return_content: yes
+  register: jenkins_crumb
+  until: jenkins_crumb.content.find('Please wait while Jenkins is getting ready to work') == -1
+  retries: 10
+  delay: 5
+
+- name: Set crumb token
+  set_fact:
+    jenkins_crumb_token: "{{ jenkins_crumb.json.crumbRequestField }}={{ jenkins_crumb.json.crumb }}"
+
+- name: Get installed plugins
+  uri:
+    user: admin
+    password: "{{ jenkins_admin_password }}"
+    force_basic_auth: yes
+    url: "http://127.0.0.1:8080/pluginManager/api/json?tree=plugins[shortName]&{{ jenkins_crumb_token }}"
+    return_content: yes
+  register: jenkins_installed_plugins
+
+- name: Install plugins
+  uri:
+    user: admin
+    password: "{{ jenkins_admin_password }}"
+    force_basic_auth: yes
+    url: "http://127.0.0.1:8080/pluginManager/install?plugin.{{ item }}.default=on&{{ jenkins_crumb_token }}"
+    method: POST
+    status_code: [200, 302]
+  when: item not in jenkins_installed_plugins.json.plugins|map(attribute='shortName')|list
+  with_items: "{{ jenkins_plugins }}"
+
+- name: Wait for plugins to be installed
+  uri:
+    user: admin
+    password: "{{ jenkins_admin_password }}"
+    force_basic_auth: yes
+    url: "http://127.0.0.1:8080/updateCenter/installStatus?{{ jenkins_crumb_token }}"
+    return_content: yes
+  register: jenkins_plugin_status
+  until: "'Pending' not in jenkins_plugin_status.json.data.jobs|map(attribute='installStatus')"
+  retries: 60
+  delay: 10
+
+- name: Check if we need to restart Jenkins to activate plugins
+  uri:
+    user: admin
+    password: "{{ jenkins_admin_password }}"
+    force_basic_auth: yes
+    url: "http://127.0.0.1:8080/updateCenter/api/json\
+    ?tree=restartRequiredForCompletion&{{ jenkins_crumb_token }}"
+    return_content: yes
+  register: jenkins_restart_required
+
+- name: Restart Jenkins to activate new plugins
+  service: name=jenkins state=restarted
+  when: jenkins_restart_required.json.restartRequiredForCompletion|bool
+
+- name: Wait for Jenkins to become available
+  wait_for: port=8080
+
+- include: seed-job.yml
