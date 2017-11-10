@@ -6,16 +6,16 @@
   apt_key: id=D50582E6 url=https://pkg.jenkins.io/debian/jenkins.io.key
 
 - name: Add Jenkins repository
-  apt_repository: repo='deb http://pkg.jenkins.io/debian binary/' state=present update_cache=yes
+  apt_repository: repo='deb http://pkg.jenkins.io/debian-stable binary/' state=present update_cache=yes
 
 - name: Install Jenkins
-  apt: name=jenkins state=present
+  apt: name="jenkins={{ jenkins_version }}" state=present update_cache=yes
 
 - name: Set Jenkins JAVA_ARGS
   lineinfile:
     dest: "{{ jenkins_defaults_file }}"
     insertbefore: "^JENKINS_ARGS.*"
-    line: "JAVA_ARGS=\"{{ jenkins_java_args }}\""
+    line: "JAVA_ARGS=\"{{ jenkins_java_args }} {{ jenkins_java_extra_args }}\""
   register: jenkins_defaults
 
 - name: Allow logins with Jenkins SSH key

@@ -1,5 +1,6 @@
 ---
 jenkins_java_args: -Djava.awt.headless=true -Djenkins.install.runSetupWizard=false
+jenkins_java_extra_args: ""
 jenkins_defaults_file: /etc/default/jenkins
 jenkins_plugins:
 - git
@@ -9,3 +10,4 @@ jenkins_plugins:
 jenkins_seed_name: pipeline-seed
 jenkins_seed_template: seed-config.xml.j2
 jenkins_job_template: jobs.groovy.j2
+jenkins_version: "2.73.3"
