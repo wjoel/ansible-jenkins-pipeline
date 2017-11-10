@@ -22,9 +22,10 @@
     force_basic_auth: yes
     url: "http://127.0.0.1:8080/createItem?name={{ jenkins_seed_name }}&{{ jenkins_crumb_token }}"
     method: POST
-    HEADER_Content-Type: application/xml
+    headers:
+      Content-Type: "application/xml"
     body: "{{ lookup('template', jenkins_seed_template) }}"
-  register: jenkins_seed_job_updated
+  register: jenkins_seed_job_created
   when: not jenkins_seed_job_exists
 
 - name: Update seed job
@@ -34,7 +35,8 @@
     force_basic_auth: yes
     url: "http://127.0.0.1:8080/job/{{ jenkins_seed_name }}/config.xml?{{ jenkins_crumb_token }}"
     method: POST
-    HEADER_Content-Type: application/xml
+    headers:
+      Content-Type: "application/xml"
     body: "{{ lookup('template', jenkins_seed_template) }}"
   register: jenkins_seed_job_updated
   when: jenkins_seed_job_exists
