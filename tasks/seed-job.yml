@@ -49,4 +49,18 @@
     url: "http://127.0.0.1:8080/job/{{ jenkins_seed_name }}/build?{{ jenkins_crumb_token }}"
     method: POST
     status_code: 201
-  when: jenkins_seed_job_updated|success
+  register: jenkins_seed_job_started
+  when: jenkins_seed_job_created|success or jenkins_seed_job_updated|success
+
+- name: Wait for seed job
+  uri:
+    user: admin
+    password: "{{ jenkins_admin_password }}"
+    force_basic_auth: yes
+    url: "http://127.0.0.1:8080/job/{{ jenkins_seed_name }}/lastBuild/buildNumber?{{ jenkins_crumb_token }}"
+    method: GET
+    status_code: 200
+  register: jenkins_seed
+  until: jenkins_seed['status']|default(0) == 200
+  retries: 10
+  delay: 5
