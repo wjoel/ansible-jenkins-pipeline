@@ -20,12 +20,14 @@
 
 - name: Allow logins with Jenkins SSH key
   authorized_key: user=jenkins key="{{ lookup('file', jenkins_ssh_public_key) }}"
+  when: "jenkins_ssh_public_key is defined and jenkins_ssh_public_key is not none"
 
 - name: Ensure Jenkins SSH directory exists
   file: path="~jenkins/.ssh" owner=jenkins group=jenkins mode=0755 state=directory
 
 - name: Install Jenkins SSH key
   copy: src="{{ jenkins_ssh_private_key }}" dest="~jenkins/.ssh/id_rsa" owner=jenkins group=jenkins mode=0600
+  when: "jenkins_ssh_private_key is defined and jenkins_ssh_private_key is not none"
 
 - name: Remove initial Jenkins password
   file: name=/var/lib/jenkins/secrets/initialAdminPassword state=absent
