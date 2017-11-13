@@ -12,16 +12,19 @@
   <triggers/>
   <concurrentBuild>false</concurrentBuild>
   <builders>
-    <javaposse.jobdsl.plugin.ExecuteDslScripts plugin="job-dsl@1.48">
+    <javaposse.jobdsl.plugin.ExecuteDslScripts plugin="job-dsl@1.66">
       <scriptText>{{ lookup('template', jenkins_job_template) }}
       </scriptText>
       <usingScriptText>true</usingScriptText>
+      <sandbox>false</sandbox>
       <ignoreExisting>false</ignoreExisting>
       <ignoreMissingFiles>false</ignoreMissingFiles>
+      <failOnMissingPlugin>false</failOnMissingPlugin>
+      <unstableOnDeprecation>false</unstableOnDeprecation>
       <removedJobAction>DELETE</removedJobAction>
       <removedViewAction>DELETE</removedViewAction>
+      <removedConfigFilesAction>IGNORE</removedConfigFilesAction>
       <lookupStrategy>JENKINS_ROOT</lookupStrategy>
-      <additionalClasspath></additionalClasspath>
     </javaposse.jobdsl.plugin.ExecuteDslScripts>
   </builders>
   <publishers/>
