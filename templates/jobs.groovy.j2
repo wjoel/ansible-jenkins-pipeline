@@ -1,5 +1,8 @@
 {% for repository in jenkins_git_repositories %}
 pipelineJob('{{ repository }}') {
+  triggers {
+    scm ''
+  }
   definition {
     cpsScm {
       scm {
