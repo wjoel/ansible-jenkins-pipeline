@@ -65,6 +65,14 @@
     src: jenkins.model.DownloadSettings.xml
     dest: "~jenkins/jenkins.model.DownloadSettings.xml"
 
+- name: Create /var/lib/jenkins/secrets
+  file: path="/var/lib/jenkins/secrets" owner=jenkins group=jenkins mode=0700 state=directory recurse=yes
+
+- name: Enable master to slave access control
+  copy:
+    content: "false"
+    dest: "/var/lib/jenkins/secrets/slave-to-master-security-kill-switch"
+
 # Restart with a task instead of a handler, since we need those changes to
 # be applied right away so that we can use the admin password in API calls.
 - name: Restart Jenkins if necessary
