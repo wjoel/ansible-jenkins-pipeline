@@ -45,7 +45,15 @@
 
 - name: Create config
   copy: src=config.xml dest="~jenkins/config.xml"
-  register: jenkins_config
+  register: jenkins_config_change
+
+- name: Create CLI config (disable CLI)
+  copy: src=jenkins.CLI.xml dest="~jenkins/jenkins.CLI.xml"
+
+- name: Create queue item authenticator configuration
+  copy:
+    src: jenkins.security.QueueItemAuthenticatorConfiguration.xml
+    dest: "~jenkins/jenkins.security.QueueItemAuthenticatorConfiguration.xml"
 
 # Restart with a task instead of a handler, since we need those changes to
 # be applied right away so that we can use the admin password in API calls.
