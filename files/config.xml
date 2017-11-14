@@ -34,6 +34,7 @@
   <primaryView>All</primaryView>
   <slaveAgentPort>0</slaveAgentPort>
   <disabledAgentProtocols>
+    <string>JNLP-connect</string>
     <string>JNLP2-connect</string>
     <string>JNLP3-connect</string>
   </disabledAgentProtocols>

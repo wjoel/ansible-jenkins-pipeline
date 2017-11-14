@@ -60,6 +60,11 @@
     src: javaposse.jobdsl.plugin.GlobalJobDslSecurityConfiguration.xml
     dest: "~jenkins/javaposse.jobdsl.plugin.GlobalJobDslSecurityConfiguration.xml"
 
+- name: Create download settings configuration
+  copy:
+    src: jenkins.model.DownloadSettings.xml
+    dest: "~jenkins/jenkins.model.DownloadSettings.xml"
+
 # Restart with a task instead of a handler, since we need those changes to
 # be applied right away so that we can use the admin password in API calls.
 - name: Restart Jenkins if necessary
