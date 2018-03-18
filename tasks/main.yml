@@ -89,8 +89,9 @@
     force_basic_auth: yes
     url: "http://127.0.0.1:8080/crumbIssuer/api/json"
     return_content: yes
+    status_code: 200, 404
   register: jenkins_crumb
-  until: jenkins_crumb.content.find('Please wait while Jenkins is getting ready to work') == -1
+  until: jenkins_crumb.status == 200 and jenkins_crumb.content.find('Please wait while Jenkins is getting ready to work') == -1
   retries: 10
   delay: 5
 
