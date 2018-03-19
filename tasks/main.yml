@@ -92,7 +92,7 @@
     status_code: 200, 404
   register: jenkins_crumb
   until: jenkins_crumb.status == 200 and jenkins_crumb.content.find('Please wait while Jenkins is getting ready to work') == -1
-  retries: 10
+  retries: 100
   delay: 5
 
 - name: Set crumb token
