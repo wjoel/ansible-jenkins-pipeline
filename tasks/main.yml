@@ -44,7 +44,7 @@
   register: jenkins_admin_config
 
 - name: Create config
-  copy: src=config.xml dest="~jenkins/config.xml"
+  template: src=config.xml.j2 dest="~jenkins/config.xml"
   register: jenkins_config_change
 
 - name: Create scriptApproval
@@ -135,6 +135,12 @@
   retries: 60
   delay: 10
 
+- name: Add cloud configs to config.xml
+  blockinfile:
+    dest: "~jenkins/config.xml"
+    block: "{{ jenkins_cloud_configs }}"
+    insertafter: "<clouds>"
+
 - name: Check if we need to restart Jenkins to activate plugins
   uri:
     user: admin
@@ -152,4 +158,4 @@
 - name: Wait for Jenkins to become available
   wait_for: port=8080
 
-- include: seed-job.yml
+- include_tasks: seed-job.yml
