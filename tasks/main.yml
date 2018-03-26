@@ -136,10 +136,13 @@
   delay: 10
 
 - name: Add cloud configs to config.xml
-  blockinfile:
+  replace:
     dest: "~jenkins/config.xml"
-    block: "{{ jenkins_cloud_configs }}"
-    insertafter: "<clouds>"
+    regexp: "<clouds/>"
+    replace: |
+      <clouds>
+        {{ jenkins_cloud_configs }}
+      </clouds>
 
 - name: Check if we need to restart Jenkins to activate plugins
   uri:
