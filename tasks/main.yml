@@ -47,6 +47,10 @@
   copy: src=config.xml dest="~jenkins/config.xml"
   register: jenkins_config_change
 
+- name: Create scriptApproval
+  template: src=scriptApproval.xml.j2 dest="~jenkins/scriptApproval.xml"
+  register: jenkins_config_change
+
 - name: Create CLI config (disable CLI)
   copy: src=jenkins.CLI.xml dest="~jenkins/jenkins.CLI.xml"
 

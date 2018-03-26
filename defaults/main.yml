@@ -10,4 +10,10 @@ jenkins_plugins:
 jenkins_seed_name: pipeline-seed
 jenkins_seed_template: seed-config.xml.j2
 jenkins_job_template: jobs.groovy.j2
-jenkins_version: "2.73.3"
+jenkins_version: "2.107.1"
+jenkins_approved_signatures:
+- method hudson.plugins.git.GitSCM getBranches
+- method hudson.plugins.git.GitSCM getUserRemoteConfigs
+- method hudson.plugins.git.GitSCMBackwardCompatibility getExtensions
+jenkins_acl_approved_signatures: []
+
