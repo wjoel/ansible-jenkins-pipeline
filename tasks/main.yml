@@ -51,6 +51,13 @@
   template: src=scriptApproval.xml.j2 dest="~jenkins/scriptApproval.xml"
   register: jenkins_config_change
 
+- name: Create Jenkins location configuration
+  template:
+    src: jenkins.model.JenkinsLocationConfiguration.xml.j2
+    dest: "~jenkins/jenkins.model.JenkinsLocationConfiguration.xml"
+  when: jenkins_url is defined and jenkins_url != ""
+  register: jenkins_config_change
+
 - name: Create CLI config (disable CLI)
   copy: src=jenkins.CLI.xml dest="~jenkins/jenkins.CLI.xml"
 

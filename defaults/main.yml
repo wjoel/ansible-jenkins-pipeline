@@ -18,3 +18,5 @@ jenkins_approved_signatures:
 jenkins_acl_approved_signatures: []
 jenkins_slave_agent_port: 0
 jenkins_cloud_configs: ""
+jenkins_admin_address: nobody@example.com
+#jenkins_url:
