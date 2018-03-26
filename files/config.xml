@@ -32,7 +32,7 @@
     </hudson.model.AllView>
   </views>
   <primaryView>All</primaryView>
-  <slaveAgentPort>0</slaveAgentPort>
+  <slaveAgentPort>{{ jenkins_slave_agent_port }}</slaveAgentPort>
   <disabledAgentProtocols>
     <string>JNLP-connect</string>
     <string>JNLP2-connect</string>
