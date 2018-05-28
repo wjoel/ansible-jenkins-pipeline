@@ -71,6 +71,11 @@
     src: javaposse.jobdsl.plugin.GlobalJobDslSecurityConfiguration.xml
     dest: "~jenkins/javaposse.jobdsl.plugin.GlobalJobDslSecurityConfiguration.xml"
 
+- name: Create credentials configuration
+  template:
+    src: credentials.xml.j2
+    dest: "~jenkins/credentials.xml"
+
 - name: Create download settings configuration
   copy:
     src: jenkins.model.DownloadSettings.xml
